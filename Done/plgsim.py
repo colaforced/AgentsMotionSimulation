@@ -43,8 +43,9 @@ verys.append(Vertexs_List[0][1])
 verzs.append(Vertexs_List[0][2])
 
 """初始化图像"""
+
 fig = plt.figure()
-ax = plt.gca(projection='3d')
+ax = fig.add_subplot(projection='3d')
 ax.set_xlim(0, 100)
 ax.set_xlabel('X')
 ax.set_ylim(0, 100)
