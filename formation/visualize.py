@@ -3,11 +3,11 @@ from matplotlib import animation
 
 
 def animate(sim, rounds_per_frame=1, interval=20, save=None, fps=30):
-    """3D 动画展示仿真过程。save 为 .gif 路径时保存成文件而不弹窗（需要 pillow）。"""
+    """3D 动画展示仿真过程。save 为 .gif 路径时保存成文件而不弹窗。"""
     fig = plt.figure(figsize=(7, 6))
     ax = fig.add_subplot(projection='3d')
     pgn = sim.pgn
-    top = max(a.stagger_span for a in sim.agents) / 2 + pgn.h + 25
+    top = pgn.h + sim.params.stagger_span / 2 + 25
     ax.set(xlim=(0, sim.area), ylim=(0, sim.area), zlim=(0, top), xlabel='X', ylabel='Y', zlabel='Z')
 
     vx = list(pgn.vertexs[:, 0]) + [pgn.vertexs[0, 0]]
@@ -44,4 +44,3 @@ def animate(sim, rounds_per_frame=1, interval=20, save=None, fps=30):
         plt.close(fig)
     else:
         plt.show()
-    return ani

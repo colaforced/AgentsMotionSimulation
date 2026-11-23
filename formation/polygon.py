@@ -14,7 +14,7 @@ class Polygon:
     def __init__(self, m, r, h, cx=50.0, cy=50.0):
         if m < 3:
             raise ValueError("多边形边数 m 至少为 3")
-        self.m, self.r, self.h, self.cx, self.cy = m, r, h, cx, cy
+        self.m, self.h = m, h
         self.vertexs = np.array([[cx + r * math.sin(2 * math.pi * i / m),
                                   cy + r * math.cos(2 * math.pi * i / m)] for i in range(1, m + 1)])
         self._edges = np.roll(self.vertexs, -1, axis=0) - self.vertexs  # 第 i 条边：顶点 i → 顶点 i+1

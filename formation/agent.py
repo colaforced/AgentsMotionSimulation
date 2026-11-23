@@ -1,9 +1,19 @@
 import math
+from dataclasses import dataclass
 from enum import IntEnum
 
 
+@dataclass(frozen=True)
+class Params:
+    """所有智能体共用的运动参数。"""
+    v_z: float = 4.0              # 每次激活的竖直移动距离
+    v_xy: float = 1.0             # 每次激活的水平移动距离
+    stagger_span: float = 350.0   # 高度错开时各高度层的总跨度
+    uniform_tol: float = 0.05     # 均匀化完成时，相邻间距与理想值的容差
+
+
 class Phase(IntEnum):
-    """编队流程（见 pics/图2）。所有个体都完成当前阶段后，才会进入下一阶段。"""
+    """编队流程（见 docs/flowchart.png）。所有个体都完成当前阶段后，才会进入下一阶段。"""
     CLIMB = 0       # 从地面爬升到编队高度
     STAGGER = 1     # 高度错开：各占一个高度层，水平移动时互不碰撞
     TO_POLYGON = 2  # 抵达多边形：占领最近的空顶点，或向顶点占领者排队
@@ -25,14 +35,11 @@ class Agent:
     决策只读取其他个体的位置、阶段和对询问的应答，不依赖 ID。
     """
 
-    def __init__(self, x, y, z, pgn, swarm, rng, *, v_z=4.0, v_xy=1.0, stagger_span=350.0, uniform_tol=0.05):
+    def __init__(self, x, y, z, pgn, swarm, params, rng):
         self.x, self.y, self.z = float(x), float(y), float(z)
         self.pgn = pgn
         self.swarm = swarm
-        self.v_z = v_z                    # 每次激活的竖直移动距离
-        self.v_xy = v_xy                  # 每次激活的水平移动距离
-        self.stagger_span = stagger_span  # 高度错开时各高度层总跨度
-        self.uniform_tol = uniform_tol    # 均匀化完成的间距容差
+        self.params = params
 
         self.phase = Phase.CLIMB
         self.phase_done = False
@@ -69,15 +76,15 @@ class Agent:
         return all(a.phase > self.phase or (a.phase == self.phase and a.phase_done) for a in self.swarm)
 
     def _climb(self):
-        self.z = approach(self.z, self.pgn.h, self.v_z)
+        self.z = approach(self.z, self.pgn.h, self.params.v_z)
         self.phase_done = self.z == self.pgn.h
 
     def _stagger(self):
         if self.layer_h is None:
             n = len(self.swarm)
             rank = sorted(a.rp for a in self.swarm).index(self.rp)
-            self.layer_h = self.pgn.h + (rank - (n - 1) / 2) * self.stagger_span / n
-        self.z = approach(self.z, self.layer_h, self.v_z)
+            self.layer_h = self.pgn.h + (rank - (n - 1) / 2) * self.params.stagger_span / n
+        self.z = approach(self.z, self.layer_h, self.params.v_z)
         self.phase_done = self.z == self.layer_h
 
     def _to_polygon(self):
@@ -111,25 +118,26 @@ class Agent:
             return
         gap_next = min((o - s) % L for o in others)  # 到前方最近个体的弧长
         gap_pre = min((s - o) % L for o in others)   # 到后方最近个体的弧长
-        ideal = L / len(self.swarm)
-        self.phase_done = abs(gap_next - ideal) < self.uniform_tol and abs(gap_pre - ideal) < self.uniform_tol
+        ideal, tol, v = L / len(self.swarm), self.params.uniform_tol, self.params.v_xy
+        self.phase_done = abs(gap_next - ideal) < tol and abs(gap_pre - ideal) < tol
         # 前后邻居中点在 s + (gap_next - gap_pre)/2，目标取它与自身的中点
-        delta = max(-self.v_xy, min(self.v_xy, (gap_next - gap_pre) / 4))
+        delta = max(-v, min(v, (gap_next - gap_pre) / 4))
         self.x, self.y = (float(c) for c in self.pgn.point_at(s + delta))
 
     def _converge(self):
-        self.z = approach(self.z, self.pgn.h, self.v_z)
+        self.z = approach(self.z, self.pgn.h, self.params.v_z)
         self.phase_done = self.z == self.pgn.h
 
     def _move_xy(self, aim):
         """水平方向朝 aim 移动至多 v_xy，到达返回 True。"""
+        v = self.params.v_xy
         dx, dy = aim[0] - self.x, aim[1] - self.y
         dist = math.hypot(dx, dy)
-        if dist <= self.v_xy:
+        if dist <= v:
             self.x, self.y = float(aim[0]), float(aim[1])
             return True
-        self.x += self.v_xy * dx / dist
-        self.y += self.v_xy * dy / dist
+        self.x += v * dx / dist
+        self.y += v * dy / dist
         return False
 
     _ACTIONS = {
