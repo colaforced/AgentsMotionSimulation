@@ -1,0 +1,36 @@
+formation/simulation.py
+  s_63f5e9d77eca6e::t_21ca6795e2dcb7 1-62
+formation/__init__.py
+  s_63f5e9d77eca6e::t_f41489475d9751 1-6
+formation/visualize.py
+  s_63f5e9d77eca6e::t_5f04fb48507f7d 1-28,32-47
+  s_63f5e9d77eca6e::t_24a9b1f203eaae 29-31
+formation/polygon.py
+  s_63f5e9d77eca6e::t_e72e816a87f298 1-61
+formation/agent.py
+  s_63f5e9d77eca6e::t_9f8f0323e8ffa4 1-141
+.gitignore
+  s_63f5e9d77eca6e::t_10525ed0f3a245 1-3
+main.py
+  s_63f5e9d77eca6e::t_09a8d6e352db3f 1-15,17-25,27-30
+  s_63f5e9d77eca6e::t_6e493d03445e40 16
+  s_63f5e9d77eca6e::t_453f7912c663cf 26
+tests/test_formation.py
+  s_63f5e9d77eca6e::t_1c8afb6127c562 1-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.52-trip",
+  "base_commit_sha": "281edf05bf6e109bea09831893e2d1fe8463c7b7",
+  "prompts": {},
+  "sessions": {
+    "s_63f5e9d77eca6e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b4eeb900-0110-4fe0-ae63-5fabdcd0814b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "pengyong <pengyong@trip.com>"
+    }
+  }
+}
